@@ -68,7 +68,7 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		resp := &model.CreateTODOResponse{
-			Todo: *todo,
+			TODO: *todo,
 		}
 
 		// Content-Type ヘッダを application/json に設定
