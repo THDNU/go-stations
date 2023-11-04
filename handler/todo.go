@@ -38,7 +38,6 @@ func (h *TODOHandler) Read(ctx context.Context, req *model.ReadTODORequest) (*mo
 
 // Update handles the endpoint that updates the TODO.
 func (h *TODOHandler) Update(ctx context.Context, req *model.UpdateTODORequest) (*model.UpdateTODOResponse, error) {
-	_, _ = h.svc.UpdateTODO(ctx, 0, "", "")
 	todo, err := h.svc.UpdateTODO(ctx, req.ID, req.Subject, req.Description)
 	if err != nil {
 		return nil, err
@@ -89,15 +88,15 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if req.Subject == "" {
-			http.Error(w, "Bad Request: Subject cannot be empty", http.StatusBadRequest)
+		if req.ID == 0 || req.Subject == "" {
+			http.Error(w, "Bad Request: Subject cannot be empty or ID cannot be 0", http.StatusBadRequest)
 			return
 		}
 
 		ctx := r.Context()
 		todo, err := h.Update(ctx, &req)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "Not Found", http.StatusNotFound)
 			return
 		}
 
