@@ -39,7 +39,7 @@ func (h *TODOHandler) Read(ctx context.Context, req *model.ReadTODORequest) (*mo
 // Update handles the endpoint that updates the TODO.
 func (h *TODOHandler) Update(ctx context.Context, req *model.UpdateTODORequest) (*model.UpdateTODOResponse, error) {
 	_, _ = h.svc.UpdateTODO(ctx, 0, "", "")
-	todo, err := h.svc.UpdateTODO(ctx, int64(req.ID), req.Subject, req.Description)
+	todo, err := h.svc.UpdateTODO(ctx, req.ID, req.Subject, req.Description)
 	if err != nil {
 		return nil, err
 	}
