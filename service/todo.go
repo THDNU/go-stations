@@ -86,7 +86,7 @@ func (s *TODOService) ReadTODO(ctx context.Context, prevID, size int64) ([]*mode
 	}
 
 	if len(todos) == 0 {
-		return nil, nil
+		return []*model.TODO{}, nil
 	}
 
 	return todos, nil
