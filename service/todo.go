@@ -57,7 +57,7 @@ func (s *TODOService) ReadTODO(ctx context.Context, prevID, size int64) ([]*mode
 	var query string
 	var args []interface{}
 
-	if prevID <= 0 {
+	if prevID == -1 {
 		query = read
 		args = []interface{}{size}
 	} else {
