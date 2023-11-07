@@ -39,6 +39,10 @@ func (h *TODOHandler) Read(ctx context.Context, req *model.ReadTODORequest) (*mo
 	}
 	var todos []model.TODO
 
+	if len(todos_pointer) == 0 {
+		return &model.ReadTODOResponse{TODOs: []model.TODO{}}, nil
+	}
+
 	for _, todo := range todos_pointer {
 		todos = append(todos, *todo)
 	}
@@ -118,22 +122,11 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case http.MethodGet:
-		var req model.ReadTODORequest
-
 		// URLのクエリパラメーターから取得
-		prevID, errPrevID := strconv.ParseInt(r.URL.Query().Get("prev_id"), 10, 64)
-		if errPrevID != nil {
-			http.Error(w, "Bad Request: Invalid prev_id", http.StatusBadRequest)
-			return
-		}
+		prevID, _ := strconv.ParseInt(r.URL.Query().Get("prev_id"), 10, 64)
+		size, _ := strconv.ParseInt(r.URL.Query().Get("size"), 10, 64)
 
-		size, errSize := strconv.ParseInt(r.URL.Query().Get("size"), 10, 64)
-		if errSize != nil {
-			http.Error(w, "Bad Request: Invalid size", http.StatusBadRequest)
-			return
-		}
-
-		req = model.ReadTODORequest{
+		req := model.ReadTODORequest{
 			PrevID: prevID,
 			Size:   size,
 		}
@@ -144,7 +137,6 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-
 		// Content-Type ヘッダを application/json に設定
 		w.Header().Set("Content-Type", "application/json")
 

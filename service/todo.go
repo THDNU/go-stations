@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/TechBowl-japan/go-stations/model"
 )
@@ -57,7 +58,9 @@ func (s *TODOService) ReadTODO(ctx context.Context, prevID, size int64) ([]*mode
 	var query string
 	var args []interface{}
 
-	if prevID == 0 {
+	if prevID == 0 && size == 0 {
+		query = strings.Replace(read, "LIMIT ?", "", -1)
+	} else if prevID == 0 {
 		query = read
 		args = []interface{}{size}
 	} else {
