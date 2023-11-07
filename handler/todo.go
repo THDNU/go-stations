@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/TechBowl-japan/go-stations/model"
 	"github.com/TechBowl-japan/go-stations/service"
@@ -32,8 +33,17 @@ func (h *TODOHandler) Create(ctx context.Context, req *model.CreateTODORequest) 
 
 // Read handles the endpoint that reads the TODOs.
 func (h *TODOHandler) Read(ctx context.Context, req *model.ReadTODORequest) (*model.ReadTODOResponse, error) {
-	_, _ = h.svc.ReadTODO(ctx, 0, 0)
-	return &model.ReadTODOResponse{}, nil
+	todos_pointer, err := h.svc.ReadTODO(ctx, req.PrevID, req.Size)
+	if err != nil {
+		return nil, err
+	}
+	var todos []model.TODO
+
+	for _, todo := range todos_pointer {
+		todos = append(todos, *todo)
+	}
+
+	return &model.ReadTODOResponse{TODOs: todos}, nil
 }
 
 // Update handles the endpoint that updates the TODO.
@@ -104,6 +114,41 @@ func (h *TODOHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if err := json.NewEncoder(w).Encode(todo); err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	case http.MethodGet:
+		var req model.ReadTODORequest
+
+		// URLのクエリパラメーターから取得
+		prevID, errPrevID := strconv.ParseInt(r.URL.Query().Get("prev_id"), 10, 64)
+		if errPrevID != nil {
+			http.Error(w, "Bad Request: Invalid prev_id", http.StatusBadRequest)
+			return
+		}
+
+		size, errSize := strconv.ParseInt(r.URL.Query().Get("size"), 10, 64)
+		if errSize != nil {
+			http.Error(w, "Bad Request: Invalid size", http.StatusBadRequest)
+			return
+		}
+
+		req = model.ReadTODORequest{
+			PrevID: prevID,
+			Size:   size,
+		}
+
+		ctx := r.Context()
+		todos, err := h.Read(ctx, &req)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		// Content-Type ヘッダを application/json に設定
+		w.Header().Set("Content-Type", "application/json")
+
+		if err := json.NewEncoder(w).Encode(todos); err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
