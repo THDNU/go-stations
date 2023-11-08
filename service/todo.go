@@ -130,9 +130,6 @@ func (s *TODOService) UpdateTODO(ctx context.Context, id int64, subject, descrip
 
 // DeleteTODO deletes TODOs on DB by ids.
 func (s *TODOService) DeleteTODO(ctx context.Context, ids []int64) error {
-	if len(ids) == 0 {
-		return nil
-	}
 	const deleteFmt = `DELETE FROM todos WHERE id IN (?%s)`
 
 	query := fmt.Sprintf(deleteFmt, strings.Repeat(", ?", len(ids)-1))
